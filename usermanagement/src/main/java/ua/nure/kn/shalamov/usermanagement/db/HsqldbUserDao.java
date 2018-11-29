@@ -1,8 +1,10 @@
 package ua.nure.kn.shalamov.usermanagement.db;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
@@ -30,10 +32,15 @@ public class HsqldbUserDao implements UserDao{
             if (insertedRows != 1) {
                 throw new DatabaseException("Number of the inserted rows: " + insertedRows);
             }
+            CallableStatement callableStatement = connection.prepareCall("call IDENTITY()");
+            ResultSet resultSet = callableStatement.executeQuery();
+            if (resultSet.next()) {
+                user.setId(resultSet.getLong(1));
+            }
+            return user;
         } catch (SQLException e) {
             throw new DatabaseException(e.getMessage());
         }
-		return null;
 	}
 
 	@Override
