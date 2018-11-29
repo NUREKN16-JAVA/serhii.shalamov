@@ -11,8 +11,8 @@ import ua.nure.kn.shalamov.usermanagement.User;
 
 public class HsqldbUserDaoTest {
 
-	public static final String FIRST_NAME = "FirstName";
-    public static final String LAST_NAME = "LastName";
+	private static final String FIRST_NAME = "FirstName";
+    private static final String LAST_NAME = "LastName";
     private UserDao dao;
     private ConnectionFactory connectionFactory;
     
