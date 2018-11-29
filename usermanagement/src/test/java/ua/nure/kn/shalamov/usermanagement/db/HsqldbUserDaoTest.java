@@ -2,6 +2,7 @@ package ua.nure.kn.shalamov.usermanagement.db;
 
 import static org.junit.Assert.*;
 
+import java.util.Collection;
 import java.util.Date;
 
 import org.dbunit.DatabaseTestCase;
@@ -56,5 +57,17 @@ public class HsqldbUserDaoTest extends DatabaseTestCase{
 		IDataSet dataSet = new XmlDataSet(getClass().getClassLoader().getResourceAsStream("usersDataSet.xml"));
 		return dataSet;
 	}
+	
+	@Test
+    public void testGetAll() {
+        int expectedUsersNumber = 2;
+        try {
+            Collection<User> users = dao.findAll();
+             assertNotNull(users);
+            assertEquals(expectedUsersNumber, users.size());
+        } catch (DatabaseException e) {
+            fail(e.getMessage());
+        }
+    }
 
 }
