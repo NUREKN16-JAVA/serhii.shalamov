@@ -44,6 +44,7 @@ public class HsqldbUserDao implements UserDao{
             preparedStatement.close();
             callableStatement.close();
             resultSet.close();
+            connection.close();
             return user;
         } catch (SQLException e) {
             throw new DatabaseException(e.getMessage());
