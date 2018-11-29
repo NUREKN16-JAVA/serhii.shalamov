@@ -6,6 +6,12 @@ import ua.nure.kn.shalamov.usermanagement.User;
 
 public class HsqldbUserDao implements UserDao{
 
+	private ConnectionFactory connectionFactory;
+	
+    public HsqldbUserDao(ConnectionFactory connectionFactory) {
+       this.connectionFactory = connectionFactory;
+   }
+    
 	@Override
 	public User create(User user) throws DatabaseException {
 		// TODO Auto-generated method stub
