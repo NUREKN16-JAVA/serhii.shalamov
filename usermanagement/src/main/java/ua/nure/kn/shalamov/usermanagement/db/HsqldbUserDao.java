@@ -19,6 +19,9 @@ public class HsqldbUserDao implements UserDao{
 	
 	private ConnectionFactory connectionFactory;
 	
+	public HsqldbUserDao() {
+    }
+	
     public HsqldbUserDao(ConnectionFactory connectionFactory) {
        this.connectionFactory = connectionFactory;
    }
@@ -88,6 +91,15 @@ public class HsqldbUserDao implements UserDao{
             throw new DatabaseException(e.getMessage());
         }
     }
+	
+	public ConnectionFactory getConnectionFactory() {
+        return connectionFactory;
+    }
+     @Override
+    public void setConnectionFactory(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+    }
+     
      private User mapUser(ResultSet resultSet) throws SQLException {
         long id = resultSet.getLong(1);
         String firstName = resultSet.getString(2);
