@@ -6,13 +6,17 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collection;
+import java.util.LinkedList;
 
 import ua.nure.kn.shalamov.usermanagement.User;
 
 public class HsqldbUserDao implements UserDao{
 
 	private static final String INSERT_QUERY = "INSERT INTO users (firstname, lastname, dateofbirth) VALUES (?, ?, ?)";
+	private static final String SELECT_ALL_QUERY = "SELECT * FROM users";
+	
 	private ConnectionFactory connectionFactory;
 	
     public HsqldbUserDao(ConnectionFactory connectionFactory) {
@@ -71,8 +75,25 @@ public class HsqldbUserDao implements UserDao{
 
 	@Override
 	public Collection<User> findAll() throws DatabaseException {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+            Collection<User> users = new LinkedList<>();
+            Connection connection = connectionFactory.createConnection();
+            Statement statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(SELECT_ALL_QUERY);
+            while (resultSet.next()) {
+                users.add(mapUser(resultSet));
+            }
+            return users;
+        } catch (SQLException e) {
+            throw new DatabaseException(e.getMessage());
+        }
+    }
+     private User mapUser(ResultSet resultSet) throws SQLException {
+        long id = resultSet.getLong(1);
+        String firstName = resultSet.getString(2);
+        String lastName = resultSet.getString(3);
+        Date dateOfBirth = resultSet.getDate(4);
+        return new User(id, firstName, lastName, dateOfBirth);
 	}
 
 }
