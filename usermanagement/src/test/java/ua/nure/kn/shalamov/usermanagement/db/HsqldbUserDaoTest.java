@@ -48,7 +48,7 @@ public class HsqldbUserDaoTest extends DatabaseTestCase{
 
 	@Override
 	protected IDatabaseConnection getConnection() throws Exception {
-        connectionFactory = new ConnectionFactoryImpl();
+		connectionFactory = new ConnectionFactoryImpl();
         return new DatabaseConnection(connectionFactory.createConnection());
     }
 
