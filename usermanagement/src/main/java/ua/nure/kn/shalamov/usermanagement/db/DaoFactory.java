@@ -10,16 +10,21 @@ import java.util.Properties;
 	 private static final String CONNECTION_URL = "connection.url";
      private static final String CONNECTION_USER = "connection.user";
 	 private static final String CONNECTION_PASSWORD = "connection.password";
+	 private static final String PROPERTIES_FILE = "settings.properties";
+	 
+     private final static DaoFactory INSTANCE = new DaoFactory();
 	 
      private Properties properties;
+     
      public DaoFactory() {
         properties = new Properties();
         try {
-            properties.load(getClass().getClassLoader().getResourceAsStream("settings.properties"));
+        	properties.load(getClass().getClassLoader().getResourceAsStream(PROPERTIES_FILE));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+     
      private ConnectionFactory getConnectionFactory() {
     	 String driver = properties.getProperty(CONNECTION_DRIVER);
          String url = properties.getProperty(CONNECTION_URL);
@@ -27,6 +32,11 @@ import java.util.Properties;
          String password = properties.getProperty(CONNECTION_PASSWORD);
         return new ConnectionFactoryImpl(driver, url, user, password);
     }
+     
+     public static DaoFactory getInstance() {
+         return INSTANCE;
+     }
+     
      public UserDao getUserDao() {
     	 try {
              Class clas = Class.forName(properties.getProperty(USER_DAO));

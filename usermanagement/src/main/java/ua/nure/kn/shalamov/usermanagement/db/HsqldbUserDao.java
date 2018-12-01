@@ -16,6 +16,10 @@ public class HsqldbUserDao implements UserDao{
 
 	private static final String INSERT_QUERY = "INSERT INTO users (firstname, lastname, dateofbirth) VALUES (?, ?, ?)";
 	private static final String SELECT_ALL_QUERY = "SELECT * FROM users";
+	private static final String SELECT_BY_ID_QUERY = "SELECT * FROM users WHERE id = ?";
+    private static final String DELETE_QUERY = "DELETE FROM users WHERE id = ?";
+    private static final String UPDATE_QUERY = "UPDATE users SET firstname = ?, lastname = ?, dateofbirth = ?  WHERE id = ?";
+    private static final String CALL_IDENTITY = "CALL IDENTITY()";
 	
 	private ConnectionFactory connectionFactory;
 	
@@ -31,7 +35,9 @@ public class HsqldbUserDao implements UserDao{
         PreparedStatement preparedStatement = null;
         CallableStatement callableStatement = null;
         ResultSet resultSet = null;
-        try (Connection connection = connectionFactory.createConnection()) {
+        Connection connection = null;
+        try {
+        	connection = connectionFactory.createConnection();
             preparedStatement = connection.prepareStatement(INSERT_QUERY);
             int count = 1;
             preparedStatement.setString(count++, user.getFirstName());
@@ -60,32 +66,78 @@ public class HsqldbUserDao implements UserDao{
 
 	@Override
 	public void update(User user) throws DatabaseException {
-		// TODO Auto-generated method stub
-		
+		PreparedStatement preparedStatement = null;
+        try (Connection connection = connectionFactory.createConnection()) {
+            preparedStatement = connection.prepareStatement(UPDATE_QUERY);
+            int count = 1;
+            preparedStatement.setString(count++, user.getFirstName());
+            preparedStatement.setString(count++, user.getLastName());
+            preparedStatement.setDate(count++, new Date(user.getDateOfBirth().getTime()));
+            preparedStatement.setLong(count, user.getId());
+            int updatedRows = preparedStatement.executeUpdate();
+            if (updatedRows != 1) {
+                throw new DatabaseException("Exception while update operation. Effected rows: " + updatedRows);
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new DatabaseException(e.getMessage());
+        }
 	}
 
 	@Override
 	public void delete(User user) throws DatabaseException {
-		// TODO Auto-generated method stub
+		PreparedStatement preparedStatement = null;
+        try (Connection connection = connectionFactory.createConnection()) {
+            preparedStatement = connection.prepareStatement(DELETE_QUERY);
+            preparedStatement.setLong(1, user.getId());
+            int updatedRows = preparedStatement.executeUpdate();
+            if (updatedRows != 1) {
+                throw new DatabaseException("Exception while delete operation. Effected rows: " + updatedRows);
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new DatabaseException(e.getMessage());
+        }
 		
 	}
 
 	@Override
 	public User find(Long id) throws DatabaseException {
-		// TODO Auto-generated method stub
-		return null;
+		PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try (Connection connection = connectionFactory.createConnection()) {
+            User user = null;
+            preparedStatement = connection.prepareStatement(SELECT_BY_ID_QUERY);
+            preparedStatement.setLong(1, id);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                user = mapUser(resultSet);
+            }
+            preparedStatement.close();
+            resultSet.close();
+            return user;
+        } catch (SQLException e) {
+            throw new DatabaseException(e.getMessage());
+        }
 	}
 
 	@Override
 	public Collection<User> findAll() throws DatabaseException {
-		try {
+	    Statement statement = null;
+        ResultSet resultSet = null;
+        Connection connection = null;
+        try {
+        	connection = connectionFactory.createConnection();
             Collection<User> users = new LinkedList<>();
-            Connection connection = connectionFactory.createConnection();
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(SELECT_ALL_QUERY);
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(SELECT_ALL_QUERY);
+              
             while (resultSet.next()) {
                 users.add(mapUser(resultSet));
             }
+            connection.close();
+            statement.close();
+            resultSet.close();
             return users;
         } catch (SQLException e) {
             throw new DatabaseException(e.getMessage());
