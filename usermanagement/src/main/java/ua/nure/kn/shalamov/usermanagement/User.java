@@ -13,6 +13,7 @@ public class User implements Serializable {
     private Date dateOfBirth;
     private String firstName;
     private String lastName;
+    private static final String FULL_NAME_SEPARATOR = ", ";
 
     public User() {
     }
@@ -64,7 +65,7 @@ public class User implements Serializable {
     public String getFullName() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(lastName)
-                .append(" ,")
+                .append(FULL_NAME_SEPARATOR)
                 .append(firstName);
         return stringBuilder.toString();
     }

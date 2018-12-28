@@ -21,6 +21,7 @@ public class HsqldbUserDao implements UserDao{
     private static final String DELETE_QUERY = "DELETE FROM users WHERE id = ?";
     private static final String UPDATE_QUERY = "UPDATE users SET firstname = ?, lastname = ?, dateofbirth = ?  WHERE id = ?";
     private static final String CALL_IDENTITY = "CALL IDENTITY()";
+    private static final String SELECT_BY_NAMES_QUERY = "SELECT * FROM users WHERE firstname = ? AND lastname = ?";
 
     private ConnectionFactory connectionFactory;
 
@@ -110,6 +111,28 @@ public class HsqldbUserDao implements UserDao{
                 return mapUser(resultSet);
             }
             throw new DatabaseException("Can not find user by id: " + id);
+        } catch (SQLException e) {
+            throw new DatabaseException(e.getMessage());
+        } finally {
+            DbUtils.closeStatements(preparedStatement);
+            DbUtils.closeResultSet(resultSet);
+        }
+    }
+    
+    @Override
+    public Collection<User> find(String firstName, String lastName) throws DatabaseException {
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try (Connection connection = connectionFactory.createConnection()) {
+            Collection<User> users = new LinkedList<>();
+            preparedStatement = connection.prepareStatement(SELECT_BY_NAMES_QUERY);
+            preparedStatement.setString(1, firstName);
+            preparedStatement.setString(2, lastName);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                users.add(mapUser(resultSet));
+            }
+            return users;
         } catch (SQLException e) {
             throw new DatabaseException(e.getMessage());
         } finally {
